@@ -12,6 +12,8 @@ env/
 # Data
 *.csv
 !Team_miniproject1/*.csv
+Team_miniproject1/sales_filtered_2020_2025.csv
+Team_miniproject1/store_filtered_2020_2025.csv
 
 # IDE
 .vscode/
