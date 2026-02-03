@@ -11,7 +11,7 @@ env/
 
 # Data
 *.csv
-!youth_startup/서울시_상권분석서비스(추정매출-상권)_2020-2025.csv
+!Team_miniproject1/*.csv
 
 # IDE
 .vscode/

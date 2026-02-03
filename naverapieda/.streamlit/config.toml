@@ -1,3 +1,0 @@
-[server]
-# pyarrow 호환성 이슈 해결을 위한 레거시 직렬화 설정
-dataFrameSerialization = "legacy"
