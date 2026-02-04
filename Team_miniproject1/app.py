@@ -21,30 +21,35 @@ def nfc(s):
 # Get the directory where the current script is located
 DIR = os.path.dirname(os.path.abspath(__file__))
 
-SALES_PATH = os.path.join(DIR, 'sales_filtered_2020_2025.csv')
-STORE_PATH = os.path.join(DIR, 'store_filtered_2020_2025.csv')
-RENT_S_PATH = os.path.join(DIR, nfc('상권별_소규모_상가_임대가격지수_2020_2025.csv'))
-RENT_M_PATH = os.path.join(DIR, nfc('상권별_중대형_상가_임대가격지수_2020_2025.csv'))
+SALES_PATH = os.path.join(DIR, 'sales_filtered.csv')
+STORE_PATH = os.path.join(DIR, 'store_filtered.csv')
+RENT_S_PATH = os.path.join(DIR, 'rent_small.csv')
+RENT_M_PATH = os.path.join(DIR, 'rent_medium.csv')
 
 @st.cache_data
 def load_and_process_data():
     def load_csv(path):
         if not os.path.exists(path):
-            return None
+            return f"Error: File not found at {path}"
         for enc in ['utf-8-sig', 'cp949', 'euc-kr']:
             try:
-                return pd.read_csv(path, encoding=enc)
-            except:
+                df = pd.read_csv(path, encoding=enc)
+                if len(df) <= 1 and os.path.getsize(path) < 1000:
+                    return f"Error: LFS pointer file detected (size: {os.path.getsize(path)}) for {path}"
+                return df
+            except Exception as e:
+                last_err = str(e)
                 continue
-        return None
+        return f"Error: Failed to read {path} with any encoding. Last err: {last_err}"
 
     df_sales = load_csv(SALES_PATH)
     df_store = load_csv(STORE_PATH)
     df_rent_s = load_csv(RENT_S_PATH)
     df_rent_m = load_csv(RENT_M_PATH)
     
-    if df_sales is None or df_store is None or df_rent_s is None or df_rent_m is None:
-        return None, None, None, None, None
+    errors = [res for res in [df_sales, df_store, df_rent_s, df_rent_m] if isinstance(res, str)]
+    if errors:
+        return None, None, None, None, errors
 
     # Merge for efficiency analysis
     merge_cols = ['기준_년분기_코드', '상권_코드', '서비스_업종_코드']
@@ -84,10 +89,19 @@ def load_and_process_data():
 # Load data
 data_bundle = load_and_process_data()
 if data_bundle[0] is None:
-    st.error("❌ 데이터를 로드할 수 없습니다. 파일 경로 및 파일명(한글 인코딩/정규화)을 확인해 주세요.")
+    st.error("❌ 데이터를 로드할 수 없습니다.")
+    if data_bundle[4]:
+        for err in data_bundle[4]:
+            st.warning(err)
+    st.info(f"현재 작업 디렉토리: {os.getcwd()}")
+    st.info(f"스크립트 위치: {os.path.dirname(os.path.abspath(__file__))}")
+    try:
+        st.write("Team_miniproject1 폴더 파일 목록:", os.listdir(os.path.dirname(os.path.abspath(__file__))))
+    except:
+        pass
     st.stop()
 else:
-    df_merged, top_sectors, yearly_total_sales, rent_idx, sales_idx = data_bundle
+    df_merged, top_sectors, yearly_total_sales, rent_idx, sales_idx = data_bundle[:5]
 
 # Plotly Chart Functions
 def plot_sector_sales_plotly():
