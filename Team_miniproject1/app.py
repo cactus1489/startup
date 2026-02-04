@@ -13,11 +13,18 @@ st.set_page_config(
 )
 
 # Configuration
-DIR = r'c:\Users\dlstj\OneDrive\Desktop\ICB6\Team_miniproject1'
+import unicodedata
+
+def nfc(s):
+    return unicodedata.normalize('NFC', s)
+
+# Get the directory where the current script is located
+DIR = os.path.dirname(os.path.abspath(__file__))
+
 SALES_PATH = os.path.join(DIR, 'sales_filtered_2020_2025.csv')
 STORE_PATH = os.path.join(DIR, 'store_filtered_2020_2025.csv')
-RENT_S_PATH = os.path.join(DIR, '상권별_소규모_상가_임대가격지수_2020_2025.csv')
-RENT_M_PATH = os.path.join(DIR, '상권별_중대형_상가_임대가격지수_2020_2025.csv')
+RENT_S_PATH = os.path.join(DIR, nfc('상권별_소규모_상가_임대가격지수_2020_2025.csv'))
+RENT_M_PATH = os.path.join(DIR, nfc('상권별_중대형_상가_임대가격지수_2020_2025.csv'))
 
 @st.cache_data
 def load_and_process_data():
