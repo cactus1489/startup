@@ -18,17 +18,14 @@ import unicodedata
 def nfc(s):
     return unicodedata.normalize('NFC', s)
 
-# Get the directory where the current script is located
-DIR = os.path.dirname(os.path.abspath(__file__))
-
 SALES_PATH = os.path.join(DIR, 'sales_filtered.csv')
 STORE_PATH = os.path.join(DIR, 'store_filtered.csv')
 RENT_S_PATH = os.path.join(DIR, 'rent_small.csv')
 RENT_M_PATH = os.path.join(DIR, 'rent_medium.csv')
 
-VACANCY_S_PATH = os.path.join(DIR, '상권별_소규모_상가_공실률_최종_통합.csv')
-VACANCY_M_PATH = os.path.join(DIR, '상권별_중대형_상가_공실률_최종_통합.csv')
-CHANGE_PATH = os.path.join(DIR, '서울시_상권분석서비스(상권변화지표-자치구) (1).csv')
+VACANCY_S_PATH = os.path.join(DIR, 'vacancy_rate_small.csv')
+VACANCY_M_PATH = os.path.join(DIR, 'vacancy_rate_medium.csv')
+CHANGE_PATH = os.path.join(DIR, 'change_indicator_district.csv')
 
 FOOD_SECTORS = ['한식음식점', '일식음식점', '중식음식점', '서양식음식점', '커피-음료', '분식전문점', '호프-간이주점', '치킨전문점']
 
@@ -251,9 +248,9 @@ elif menu == "📁 데이터 전처리":
     data_info = [
         {"name": "🛍️ 외식업 매출 (Filter)", "file": "sales_filtered.csv", "rows": f"{len(df_merged):,}", "cols": 61, "desc": "외식업 관련 8개 업종의 상권별 분기 매출 데이터"},
         {"name": "🏪 외식업 점포 (Filter)", "file": "store_filtered.csv", "rows": "1,763,346", "cols": 15, "desc": "상권별 업종 점포 수 및 생존 지표"},
-        {"name": "📉 공실률 (소규모)", "file": "상권별_소규모_상가_공실률_최종_통합.csv", "rows": "276", "cols": 26, "desc": "서울 상권별 소규모 상가 공실률 추이"},
-        {"name": "🏢 공실률 (중대형)", "file": "상권별_중대형_상가_공실률_최종_통합.csv", "rows": "305", "cols": 26, "desc": "서울 상권별 중대형 상가의 공실 지표"},
-        {"name": "📈 상권 변화 지표", "file": "서울시_상권분석서비스(상권변화지표-자치구) (1).csv", "rows": "500+", "cols": 9, "desc": "자치구별 운영/폐업 영업 개월 수 및 상권 변화 지표"}
+        {"name": "📉 공실률 (소규모)", "file": "vacancy_rate_small.csv", "rows": "276", "cols": 26, "desc": "서울 상권별 소규모 상가 공실률 추이"},
+        {"name": "🏢 공실률 (중대형)", "file": "vacancy_rate_medium.csv", "rows": "305", "cols": 26, "desc": "서울 상권별 중대형 상가의 공실 지표"},
+        {"name": "📈 상권 변화 지표", "file": "change_indicator_district.csv", "rows": "500+", "cols": 9, "desc": "자치구별 운영/폐업 영업 개월 수 및 상권 변화 지표"}
     ]
     tabs = st.tabs([d["name"] for d in data_info])
     for i, tab in enumerate(tabs):
