@@ -18,6 +18,9 @@ import unicodedata
 def nfc(s):
     return unicodedata.normalize('NFC', s)
 
+# Get the directory where the current script is located
+DIR = os.path.dirname(os.path.abspath(__file__))
+
 SALES_PATH = os.path.join(DIR, 'sales_filtered.csv')
 STORE_PATH = os.path.join(DIR, 'store_filtered.csv')
 RENT_S_PATH = os.path.join(DIR, 'rent_small.csv')
