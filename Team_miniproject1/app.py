@@ -21,6 +21,11 @@ def nfc(s):
 # Get the directory where the current script is located
 DIR = os.path.dirname(os.path.abspath(__file__))
 
+SALES_PATH = os.path.join(DIR, 'sales_filtered.csv')
+STORE_PATH = os.path.join(DIR, 'store_filtered.csv')
+RENT_S_PATH = os.path.join(DIR, 'rent_small.csv')
+RENT_M_PATH = os.path.join(DIR, 'rent_medium.csv')
+
 VACANCY_S_PATH = os.path.join(DIR, '상권별_소규모_상가_공실률_최종_통합.csv')
 VACANCY_M_PATH = os.path.join(DIR, '상권별_중대형_상가_공실률_최종_통합.csv')
 CHANGE_PATH = os.path.join(DIR, '서울시_상권분석서비스(상권변화지표-자치구) (1).csv')
