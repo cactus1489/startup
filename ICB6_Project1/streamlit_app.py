@@ -77,18 +77,39 @@ def load_data():
         density_path = os.path.join(os.path.dirname(current_dir), '서울시_상권_좌표_밀집도_데이터.csv')
     
     if os.path.exists(results_path):
-        df_results = pd.read_csv(results_path)
-        if os.path.exists(density_path):
+        try:
+            df_results = pd.read_csv(results_path)
+            if df_results.empty:
+                st.error(f"⚠️ {results_path} 파일이 비어 있습니다.")
+                return pd.DataFrame(), pd.DataFrame()
+        except Exception as e:
+            st.error(f"⚠️ {results_path} 파일을 읽는 중 오류 발생: {e}")
+            return pd.DataFrame(), pd.DataFrame()
+            
+        if density_path and os.path.exists(density_path):
             try:
                 df_geo = pd.read_csv(density_path, encoding='utf-8')
             except:
-                df_geo = pd.read_csv(density_path, encoding='cp949')
+                try:
+                    df_geo = pd.read_csv(density_path, encoding='cp949')
+                except Exception as e:
+                    st.warning(f"⚠️ 좌표 데이터를 로드할 수 없습니다: {e}")
+                    return df_results, pd.DataFrame()
             
-            df_merged = pd.merge(df_results, df_geo[['상권명', '위도', '경도', '총_점포수']], 
-                                 left_on='상권_코드_명', right_on='상권명', how='left')
-            df_geo['Is_Target'] = df_geo['상권명'].isin(df_results['상권_코드_명'])
-            return df_merged, df_geo
+            # Check if required columns exist in df_geo before merging
+            required_geo_cols = ['상권명', '위도', '경도', '총_점포수']
+            if all(col in df_geo.columns for col in required_geo_cols):
+                df_merged = pd.merge(df_results, df_geo[required_geo_cols], 
+                                     left_on='상권_코드_명', right_on='상권명', how='left')
+                df_geo['Is_Target'] = df_geo['상권명'].isin(df_results['상권_코드_명'])
+                return df_merged, df_geo
+            else:
+                missing = [col for col in required_geo_cols if col not in df_geo.columns]
+                st.warning(f"⚠️ 좌표 데이터에 다음 컬럼이 없습니다: {missing}")
+                return df_results, pd.DataFrame()
         return df_results, pd.DataFrame()
+    
+    st.error(f"❌ '{results_path}' 파일을 찾을 수 없습니다. 경로를 확인해주세요.")
     return pd.DataFrame(), pd.DataFrame()
 
 df, df_full_geo = load_data()
@@ -261,12 +282,19 @@ elif page == "4. 공간 분석 (GIS Map)":
     with tab2:
         st.subheader("포화도 분석 (매출 대비 점포수)")
         st.markdown("우하단(매출 높음, 점포수 적음)에 위치할수록 **기반 수요는 탄탄하나 경쟁이 낮은** 우량 상권입니다.")
-        fig_sat = px.scatter(df, x='Sales_Score', y='Store_Score', size='Coffee_Index',
-                             color='Coffee_Index', text='상권_코드_명',
-                             labels={'Sales_Score': '매출 점수', 'Store_Score': '점포수 리스크'},
-                             color_continuous_scale='RdYlGn_r')
-        fig_sat.add_shape(type="line", x0=0, y0=0, x1=100, y1=100, line=dict(color="Gray", dash="dash"))
-        st.plotly_chart(fig_sat, use_container_width=True)
+        
+        required_cols = ['Sales_Score', 'Store_Score', 'Coffee_Index', '상권_코드_명']
+        if not df.empty and all(col in df.columns for col in required_cols):
+            fig_sat = px.scatter(df, x='Sales_Score', y='Store_Score', size='Coffee_Index',
+                                 color='Coffee_Index', text='상권_코드_명',
+                                 labels={'Sales_Score': '매출 점수', 'Store_Score': '점포수 리스크'},
+                                 color_continuous_scale='RdYlGn_r')
+            fig_sat.add_shape(type="line", x0=0, y0=0, x1=100, y1=100, line=dict(color="Gray", dash="dash"))
+            st.plotly_chart(fig_sat, use_container_width=True)
+        else:
+            st.warning("📊 분석 데이터가 부족하거나 형식이 맞지 않아 포화도 차트를 표시할 수 없습니다.")
+            if not df.empty:
+                st.info(f"현재 데이터 컬럼: {list(df.columns)}")
 
 elif page == "5. 인사이트 및 전략":
     st.header("5. 분석 인사이트 및 액션 플랜")
